@@ -1,122 +1,104 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0)
+const API_URL =
+  "https://www.gasquebec.ca/api/stations/nearby?lat=45.49570&lng=-73.65684&radius=5&fuelType=ordinaire&sort=price";
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+function formatPrice(price) {
+  return typeof price === "number" ? price.toFixed(1) : "--";
 }
 
-export default App
+function App() {
+  const [stations, setStations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadStations() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error(`Request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setStations(data.stations || []);
+      } catch (err) {
+        setError("Unable to load gas stations right now.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadStations();
+  }, []);
+
+  return (
+    <main className="app-shell">
+      <header className="app-header">
+        <div className="brand">
+          <span className="brand-icon">⛽</span>
+          <div>
+            <h1>Gas Near Me</h1>
+            <p>Montreal fuel prices</p>
+          </div>
+        </div>
+        <span className="updated-label">Updated on load</span>
+      </header>
+
+      <section className="intro-card">
+        <p className="eyebrow">NEARBY STATIONS</p>
+        <h2>Gas prices near you</h2>
+        <p className="intro-text">
+          Regular gasoline prices within 5 km of your selected Montreal location.
+        </p>
+      </section>
+
+      {loading && <div className="message-card">Loading nearby stations...</div>}
+
+      {!loading && error && <div className="message-card error">{error}</div>}
+
+      {!loading && !error && stations.length === 0 && (
+        <div className="message-card">No stations were found.</div>
+      )}
+
+      {!loading && !error && stations.length > 0 && (
+        <section className="station-list" aria-label="Nearby gas stations">
+          {stations.map((station, index) => (
+            <article className="station-card" key={station.stationId}>
+              <div className="station-topline">
+                <div>
+                  <p className="station-number">STATION {index + 1}</p>
+                  <h3>{station.name}</h3>
+                </div>
+                <div className="price-block">
+                  <span className="price">{formatPrice(station.price)}</span>
+                  <span className="unit">¢/L</span>
+                </div>
+              </div>
+
+              <p className="address">{station.address}</p>
+
+              <div className="station-details">
+                <span>📍 {station.distanceKm.toFixed(1)} km away</span>
+                <span>Regular</span>
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
+
+      <footer className="app-footer">
+        Prices are displayed in Canadian cents per litre.
+        <br />
+        Data source: Régie de l'énergie du Québec via Gas Quebec.
+      </footer>
+    </main>
+  );
+}
+
+export default App;
