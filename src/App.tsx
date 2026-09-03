@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
+// const API_URL =
+//   "https://www.gasquebec.ca/api/stations/nearby?lat=45.49570&lng=-73.65684&radius=5&fuelType=ordinaire&sort=price";
 const API_URL =
-  "https://www.gasquebec.ca/api/stations/nearby?lat=45.49570&lng=-73.65684&radius=5&fuelType=ordinaire&sort=price";
+  "/gas-api/api/stations/nearby?lat=45.49570&lng=-73.65684&radius=5&fuelType=ordinaire&sort=price";
 
 function formatPrice(price) {
   return typeof price === "number" ? price.toFixed(1) : "--";
@@ -54,11 +56,14 @@ function App() {
         <p className="eyebrow">NEARBY STATIONS</p>
         <h2>Gas prices near you</h2>
         <p className="intro-text">
-          Regular gasoline prices within 5 km of your selected Montreal location.
+          Regular gasoline prices within 5 km of your selected Montreal
+          location.
         </p>
       </section>
 
-      {loading && <div className="message-card">Loading nearby stations...</div>}
+      {loading && (
+        <div className="message-card">Loading nearby stations...</div>
+      )}
 
       {!loading && error && <div className="message-card error">{error}</div>}
 
