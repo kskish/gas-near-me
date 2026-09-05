@@ -4,7 +4,7 @@ import "./App.css";
 // const API_URL =
 //   "https://www.gasquebec.ca/api/stations/nearby?lat=45.49570&lng=-73.65684&radius=5&fuelType=ordinaire&sort=price";
 const API_URL =
-  "/gas-api/api/stations/nearby?lat=45.49570&lng=-73.65684&radius=5&fuelType=ordinaire&sort=price";
+  "https://square-sky-d093.kskish18.workers.dev/?lat=45.49570&lng=-73.65684&radius=5&fuelType=ordinaire&sort=price";
 
 function formatPrice(price) {
   return typeof price === "number" ? price.toFixed(1) : "--";

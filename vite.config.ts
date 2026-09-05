@@ -10,6 +10,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  base: "/gas-near-me/",
   server: {
     proxy: {
       "/gas-api": {
