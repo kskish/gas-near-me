@@ -1,19 +1,29 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-// const API_URL =
-//   "https://www.gasquebec.ca/api/stations/nearby?lat=45.49570&lng=-73.65684&radius=5&fuelType=ordinaire&sort=price";
+type Station = {
+  stationId: string;
+  name: string;
+  address: string;
+  price: number | null;
+  distanceKm: number;
+};
+
+type ApiResponse = {
+  stations: Station[];
+};
+
 const API_URL =
   "https://square-sky-d093.kskish18.workers.dev/?lat=45.49570&lng=-73.65684&radius=5&fuelType=ordinaire&sort=price";
 
-function formatPrice(price) {
+function formatPrice(price: number | null) {
   return typeof price === "number" ? price.toFixed(1) : "--";
 }
 
 function App() {
-  const [stations, setStations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [stations, setStations] = useState<Station[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     async function loadStations() {
@@ -22,11 +32,12 @@ function App() {
         setError("");
 
         const response = await fetch(API_URL);
+
         if (!response.ok) {
           throw new Error(`Request failed: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data: ApiResponse = await response.json();
         setStations(data.stations || []);
       } catch (err) {
         setError("Unable to load gas stations right now.");
